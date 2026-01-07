@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  phone         String    @unique
+  password      String
+  name          String?
+  email         String?
+  role          UserRole  @default(USER)
+  loyaltyPoints Int       @default(0)
+  country       String?
+  state         String?
+  address       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders        Order[]
+  cartItems     CartItem[]
+  sentMessages  Message[]  @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  @@map("users")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  nameEn      String
+  nameAr      String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                    String    @id @default(cuid())
+  nameEn                String
+  nameAr                String
+  descriptionEn         String?
+  descriptionAr         String?
+  price                 Float
+  costPrice             Float?
+  stock                 Int       @default(0)
+  image                 String?
+  isNew                 Boolean   @default(false)
+  isSale                Boolean   @default(false)
+  discount              Float?
+  loyaltyPointsEnabled  Boolean   @default(false)
+  loyaltyPointsValue    Int       @default(0)
+  categoryId            String
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  category    Category  @relation(fields: [categoryId], references: [id])
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  procurementItems ProcurementItem[]
+
+  @@map("products")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  quantity  Int      @default(1)
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id                    String        @id @default(cuid())
+  invoiceNumber         String        @unique
+  userId                String
+  status                OrderStatus   @default(PENDING)
+  paymentStatus         PaymentStatus @default(PENDING)
+  subtotal              Float
+  delivery              Float         @default(0)
+  discount              Float         @default(0)
+  total                 Float
+  loyaltyPointsEarned   Int           @default(0)
+  loyaltyPointsUsed     Int           @default(0)
+  country               String?
+  state                 String?
+  address               String?
+  couponCode            String?
+  paymentProof          String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  items         OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                 String   @id @default(cuid())
+  quantity           Int
+  price              Float
+  loyaltyPointsEarned Int     @default(0)
+  orderId            String
+  productId          String
+  createdAt          DateTime @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  discountType  String
+  discountValue Float
+  minPurchase   Float?
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("coupons")
+}
+
+model BankAccount {
+  id          String   @id @default(cuid())
+  bankNameEn  String
+  bankNameAr  String
+  accountName String
+  accountNumber String
+  branchEn    String?
+  branchAr    String?
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("bank_accounts")
+}
+
+model SupportInfo {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleAr     String
+  contentEn   String
+  contentAr   String
+  phone       String?
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("support_info")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  subject     String?
+  content     String
+  isRead      Boolean  @default(false)
+  isBroadcast Boolean  @default(false)
+  senderId    String?
+  receiverId  String?
+  createdAt   DateTime @default(now())
+
+  sender      User?    @relation("SentMessages", fields: [senderId], references: [id])
+  receiver    User?    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@map("messages")
+}
+
+model Procurement {
+  id          String   @id @default(cuid())
+  orderNumber String   @unique
+  supplier    String?
+  status      String   @default("pending")
+  totalCost   Float
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       ProcurementItem[]
+
+  @@map("procurements")
+}
+
+model ProcurementItem {
+  id            String   @id @default(cuid())
+  quantity      Int
+  costPrice     Float
+  procurementId String
+  productId     String
+  createdAt     DateTime @default(now())
+
+  procurement   Procurement @relation(fields: [procurementId], references: [id], onDelete: Cascade)
+  product       Product     @relation(fields: [productId], references: [id])
+
+  @@map("procurement_items")
+}
+
+model DeliveryZone {
+  id        String   @id @default(cuid())
+  country   String
+  state     String
+  price     Float
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([country, state])
+  @@map("delivery_zones")
+}
+
