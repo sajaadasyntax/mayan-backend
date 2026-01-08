@@ -3,8 +3,8 @@ module.exports = {
     {
       name: 'mayan-backend',
       script: 'dist/index.js',
-      instances: 3, // Use 3 instances (leaving 1 core for frontend/system)
-      exec_mode: 'cluster', // Cluster mode for load balancing
+      instances: 4, // Use all 4 vCPUs for maximum performance
+      exec_mode: 'cluster', // Cluster mode for load balancing across all cores
       env: {
         NODE_ENV: 'production',
         PORT: 5000
@@ -17,7 +17,7 @@ module.exports = {
       // Auto-restart configuration
       autorestart: true,
       watch: false, // Disable watch in production
-      max_memory_restart: '800M', // Restart if memory exceeds 800MB per instance
+      max_memory_restart: '800M', // Restart if memory exceeds 800MB per instance (total ~3.2GB for 4 instances)
       // Advanced PM2 features
       min_uptime: '10s', // Minimum uptime before considering app stable
       max_restarts: 10, // Maximum restarts in 1 minute
