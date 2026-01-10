@@ -4,10 +4,46 @@ import { AuthRequest } from '../middleware/auth.middleware'
 
 export const getAllCategories = async (req: Request, res: Response) => {
   try {
+    const { flat } = req.query
+    
+    if (flat === 'true') {
+      // Return flat list for dropdowns
+      const categories = await prisma.category.findMany({
+        include: {
+          parent: true,
+          _count: {
+            select: { products: true, children: true }
+          }
+        },
+        orderBy: {
+          nameEn: 'asc'
+        }
+      })
+      return res.json(categories)
+    }
+
+    // Return hierarchical structure (only root categories with nested children)
     const categories = await prisma.category.findMany({
+      where: {
+        parentId: null
+      },
       include: {
+        children: {
+          include: {
+            children: {
+              include: {
+                _count: {
+                  select: { products: true }
+                }
+              }
+            },
+            _count: {
+              select: { products: true, children: true }
+            }
+          }
+        },
         _count: {
-          select: { products: true }
+          select: { products: true, children: true }
         }
       },
       orderBy: {
@@ -29,9 +65,17 @@ export const getCategoryById = async (req: Request, res: Response) => {
     const category = await prisma.category.findUnique({
       where: { id },
       include: {
+        parent: true,
+        children: {
+          include: {
+            _count: {
+              select: { products: true }
+            }
+          }
+        },
         products: true,
         _count: {
-          select: { products: true }
+          select: { products: true, children: true }
         }
       }
     })
@@ -49,13 +93,17 @@ export const getCategoryById = async (req: Request, res: Response) => {
 
 export const createCategory = async (req: AuthRequest, res: Response) => {
   try {
-    const { nameEn, nameAr, description } = req.body
+    const { nameEn, nameAr, description, parentId } = req.body
 
     const category = await prisma.category.create({
       data: {
         nameEn,
         nameAr,
-        description
+        description,
+        parentId: parentId || null
+      },
+      include: {
+        parent: true
       }
     })
 
@@ -69,14 +117,18 @@ export const createCategory = async (req: AuthRequest, res: Response) => {
 export const updateCategory = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params
-    const { nameEn, nameAr, description } = req.body
+    const { nameEn, nameAr, description, parentId } = req.body
 
     const category = await prisma.category.update({
       where: { id },
       data: {
         nameEn,
         nameAr,
-        description
+        description,
+        parentId: parentId === '' ? null : parentId
+      },
+      include: {
+        parent: true
       }
     })
 

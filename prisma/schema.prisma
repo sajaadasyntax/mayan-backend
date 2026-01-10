@@ -54,9 +54,12 @@ model Category {
   nameEn      String
   nameAr      String
   description String?
+  parentId    String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  parent      Category?   @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[]  @relation("CategoryHierarchy")
   products    Product[]
 
   @@map("categories")
