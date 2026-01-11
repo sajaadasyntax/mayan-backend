@@ -284,7 +284,6 @@ async function main() {
 
   // Default prices (can be adjusted)
   const defaultPrice = 500
-  const defaultCostPrice = 300
 
   // Whitening Products
   const whiteningProducts = [
@@ -302,7 +301,6 @@ async function main() {
         descriptionEn: `High quality ${name} for skin whitening and brightening.`,
         descriptionAr: `${getArabicName(name)} عالي الجودة لتفتيح وإشراق البشرة.`,
         price: defaultPrice,
-        costPrice: defaultCostPrice,
         stock: 100,
         categoryId: whitening.id,
         isNew: true
@@ -322,7 +320,6 @@ async function main() {
         descriptionEn: `Professional grade ${name} for chemical peeling.`,
         descriptionAr: `${getArabicName(name)} بدرجة احترافية للتقشير الكيميائي.`,
         price: defaultPrice,
-        costPrice: defaultCostPrice,
         stock: 80,
         categoryId: peeling.id,
         isNew: true
@@ -345,7 +342,6 @@ async function main() {
         descriptionEn: `Premium ${name} for deep hydration and moisturizing.`,
         descriptionAr: `${getArabicName(name)} الممتاز للترطيب العميق.`,
         price: defaultPrice,
-        costPrice: defaultCostPrice,
         stock: 120,
         categoryId: moisturizing.id,
         isNew: true
@@ -367,7 +363,6 @@ async function main() {
         descriptionEn: `${capitalize(name)} preservative for formulation stability.`,
         descriptionAr: `مادة حافظة ${getArabicName(name)} لاستقرار التركيبات.`,
         price: 400,
-        costPrice: 250,
         stock: 150,
         categoryId: preservatives.id
       }
@@ -386,7 +381,6 @@ async function main() {
         descriptionEn: `Quality ${name} for various formulations.`,
         descriptionAr: `${getArabicName(name)} عالي الجودة للتركيبات المختلفة.`,
         price: 450,
-        costPrice: 280,
         stock: 100,
         categoryId: othersRaw.id
       }
@@ -407,7 +401,6 @@ async function main() {
         descriptionEn: `Pure ${name} essential oil for aromatherapy and skincare.`,
         descriptionAr: `زيت ${getArabicName(name)} العطري النقي للعلاج بالعطور والعناية بالبشرة.`,
         price: 600,
-        costPrice: 350,
         stock: 60,
         categoryId: essentialOils.id,
         isNew: true
@@ -427,7 +420,6 @@ async function main() {
         descriptionEn: `Pure ${name} carrier oil for diluting essential oils.`,
         descriptionAr: `زيت ${getArabicName(name)} الحامل النقي لتخفيف الزيوت العطرية.`,
         price: 350,
-        costPrice: 200,
         stock: 100,
         categoryId: carrierOils.id
       }
@@ -446,7 +438,6 @@ async function main() {
         descriptionEn: `Organic ${name} for deep nourishment.`,
         descriptionAr: `${getArabicName(name)} العضوي للتغذية العميقة.`,
         price: 400,
-        costPrice: 250,
         stock: 80,
         categoryId: butters.id,
         isNew: true
@@ -466,7 +457,6 @@ async function main() {
         descriptionEn: `${capitalize(name)} emulsifying wax for stable formulations.`,
         descriptionAr: `${getArabicName(name)} شمع مستحلب للتركيبات المستقرة.`,
         price: 350,
-        costPrice: 200,
         stock: 120,
         categoryId: waxes.id
       }
@@ -485,7 +475,6 @@ async function main() {
         descriptionEn: `Pre-formulated ${name} ready for packaging and sale.`,
         descriptionAr: `${getArabicName(name)} الجاهز للتعبئة والبيع.`,
         price: 800,
-        costPrice: 450,
         stock: 50,
         categoryId: readyToPackage.id,
         isNew: true,
@@ -507,7 +496,6 @@ async function main() {
         descriptionEn: `${capitalize(name)} for pH testing in formulations.`,
         descriptionAr: `${getArabicName(name)} لاختبار درجة الحموضة في التركيبات.`,
         price: 150,
-        costPrice: 80,
         stock: 200,
         categoryId: tools.id
       }

@@ -67,7 +67,6 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       descriptionEn,
       descriptionAr,
       price,
-      costPrice,
       image,
       isNew,
       isSale,
@@ -84,6 +83,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
     }
 
     // Note: stock defaults to 0, use procurement to add inventory
+    // Cost price is tracked per procurement batch, not per product
     const product = await prisma.product.create({
       data: {
         nameEn,
@@ -91,7 +91,6 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
         descriptionEn,
         descriptionAr,
         price: parseFloat(price),
-        costPrice: costPrice ? parseFloat(costPrice) : null,
         stock: 0, // Stock is managed via procurement, not product creation
         image: imageUrl,
         isNew: isNew === 'true' || isNew === true,
@@ -123,12 +122,14 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       data.image = getImageUrl(req.file.filename)
     }
 
-    // Remove stock from update data - stock is managed via procurement only
+    // Remove stock and costPrice from update data
+    // Stock is managed via procurement only
+    // Cost price is tracked per procurement batch, not per product
     delete data.stock
+    delete data.costPrice
 
     // Convert numeric fields
     if (data.price !== undefined) data.price = parseFloat(data.price)
-    if (data.costPrice !== undefined) data.costPrice = data.costPrice ? parseFloat(data.costPrice) : null
     if (data.discount !== undefined) data.discount = data.discount ? parseFloat(data.discount) : null
     if (data.loyaltyPointsValue !== undefined) data.loyaltyPointsValue = parseInt(data.loyaltyPointsValue) || 0
 

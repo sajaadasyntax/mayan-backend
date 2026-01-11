@@ -72,7 +72,6 @@ model Product {
   descriptionEn         String?
   descriptionAr         String?
   price                 Float
-  costPrice             Float?
   stock                 Int       @default(0)
   image                 String?
   isNew                 Boolean   @default(false)
@@ -88,6 +87,7 @@ model Product {
   cartItems   CartItem[]
   orderItems  OrderItem[]
   procurementItems ProcurementItem[]
+  recipes     ProductRecipe[]
 
   @@map("products")
 }
@@ -250,5 +250,23 @@ model DeliveryZone {
 
   @@unique([country, state])
   @@map("delivery_zones")
+}
+
+// Product Recipe - defines what products can be made using a given product
+model ProductRecipe {
+  id              String   @id @default(cuid())
+  productId       String   // The source product (ingredient)
+  recipeNameEn    String   // Name of what can be made
+  recipeNameAr    String
+  descriptionEn   String?  // Description/instructions
+  descriptionAr   String?
+  imageUrl        String?  // Optional image for the recipe
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_recipes")
 }
 

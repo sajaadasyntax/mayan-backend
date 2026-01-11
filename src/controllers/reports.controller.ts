@@ -40,8 +40,7 @@ export const getTopProductsSales = async (req: AuthRequest, res: Response) => {
         id: true,
         nameEn: true,
         nameAr: true,
-        price: true,
-        costPrice: true
+        price: true
       }
     })
 
@@ -131,7 +130,7 @@ export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
-    // Get daily sales data with cost
+    // Get daily sales data
     const orders = await prisma.order.findMany({
       where: {
         paymentStatus: 'VERIFIED',
@@ -145,7 +144,12 @@ export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
           include: {
             product: {
               select: {
-                costPrice: true
+                id: true,
+                procurementItems: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 1,
+                  select: { costPrice: true }
+                }
               }
             }
           }
@@ -164,12 +168,15 @@ export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
     }
 
     // Calculate revenue and cost for each order
+    // Cost is estimated using the latest procurement cost price for each product
     orders.forEach(order => {
       const day = new Date(order.createdAt).getDate().toString().padStart(2, '0')
       
       let orderCost = 0
       order.items.forEach(item => {
-        const itemCost = (item.product.costPrice || 0) * item.quantity
+        // Get cost price from most recent procurement, or 0 if no procurement exists
+        const latestCostPrice = item.product.procurementItems[0]?.costPrice || 0
+        const itemCost = latestCostPrice * item.quantity
         orderCost += itemCost
       })
 
@@ -178,7 +185,7 @@ export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
       dailyData[day].profit = dailyData[day].revenue - dailyData[day].cost
     })
 
-    // Also get procurement costs for the month
+    // Also get procurement costs for the month (actual expenditure on inventory)
     const procurements = await prisma.procurement.findMany({
       where: {
         createdAt: {
