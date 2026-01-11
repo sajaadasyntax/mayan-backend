@@ -143,12 +143,10 @@ export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
         items: {
           include: {
             product: {
-              select: {
-                id: true,
+              include: {
                 procurementItems: {
                   orderBy: { createdAt: 'desc' },
-                  take: 1,
-                  select: { costPrice: true }
+                  take: 1
                 }
               }
             }
