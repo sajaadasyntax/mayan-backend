@@ -19,6 +19,12 @@ export const getAllBankAccounts = async (req: Request, res: Response) => {
 export const createBankAccount = async (req: AuthRequest, res: Response) => {
   try {
     const { bankNameEn, bankNameAr, accountName, accountNumber, branchEn, branchAr, image } = req.body
+    const file = (req as any).file
+
+    let imagePath = image || null
+    if (file) {
+      imagePath = `/uploads/bank-accounts/${file.filename}`
+    }
 
     const bankAccount = await prisma.bankAccount.create({
       data: {
@@ -28,7 +34,7 @@ export const createBankAccount = async (req: AuthRequest, res: Response) => {
         accountNumber,
         branchEn,
         branchAr,
-        image
+        image: imagePath
       }
     })
 
@@ -42,7 +48,12 @@ export const createBankAccount = async (req: AuthRequest, res: Response) => {
 export const updateBankAccount = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params
-    const data = req.body
+    const data = { ...req.body }
+    const file = (req as any).file
+
+    if (file) {
+      data.image = `/uploads/bank-accounts/${file.filename}`
+    }
 
     const bankAccount = await prisma.bankAccount.update({
       where: { id },

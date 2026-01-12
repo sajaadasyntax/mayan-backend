@@ -237,3 +237,29 @@ export const updateLoyaltyPoints = async (req: AuthRequest, res: Response) => {
   }
 }
 
+export const getUserOrders = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params
+
+    const orders = await prisma.order.findMany({
+      where: { userId: id },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        status: true,
+        paymentStatus: true,
+        total: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    res.json(orders)
+  } catch (error) {
+    console.error('Get user orders error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+

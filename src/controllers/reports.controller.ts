@@ -225,6 +225,83 @@ export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
   }
 }
 
+// Get single product report with optional date filter
+export const getSingleProductReport = async (req: AuthRequest, res: Response) => {
+  try {
+    const { productId } = req.params
+    const { from, to } = req.query
+
+    // Date filter
+    const dateFilter: any = {}
+    if (from) {
+      dateFilter.gte = new Date(from as string)
+    }
+    if (to) {
+      dateFilter.lte = new Date(to as string + 'T23:59:59')
+    }
+
+    // Get product info
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true,
+        nameEn: true,
+        nameAr: true,
+        price: true,
+        stock: true
+      }
+    })
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' })
+    }
+
+    // Get order items for this product
+    const orderItems = await prisma.orderItem.findMany({
+      where: {
+        productId,
+        order: {
+          paymentStatus: 'VERIFIED',
+          ...(Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {})
+        }
+      },
+      include: {
+        order: {
+          select: {
+            id: true,
+            invoiceNumber: true,
+            createdAt: true
+          }
+        }
+      }
+    })
+
+    // Calculate totals
+    const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0)
+    const totalRevenue = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+
+    // Format orders list
+    const orders = orderItems.map(item => ({
+      invoiceNumber: item.order.invoiceNumber,
+      quantity: item.quantity,
+      price: item.price,
+      date: item.order.createdAt
+    })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+    res.json({
+      product,
+      totalQuantity,
+      totalRevenue,
+      ordersCount: new Set(orderItems.map(item => item.order.id)).size,
+      currentStock: product.stock,
+      orders
+    })
+  } catch (error) {
+    console.error('Get single product report error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
 // Get all reports combined
 export const getAllReports = async (req: AuthRequest, res: Response) => {
   try {
