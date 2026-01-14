@@ -69,8 +69,10 @@ model Product {
   id                    String    @id @default(cuid())
   nameEn                String
   nameAr                String
-  descriptionEn         String?
-  descriptionAr         String?
+  descriptionEn         String?   // Short description (English)
+  descriptionAr         String?   // Short description (Arabic)
+  longDescriptionEn     String?   // Full/Long description (English)
+  longDescriptionAr     String?   // Full/Long description (Arabic)
   price                 Float
   stock                 Int       @default(0)
   image                 String?
