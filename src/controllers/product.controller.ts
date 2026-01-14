@@ -66,6 +66,8 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       nameAr,
       descriptionEn,
       descriptionAr,
+      longDescriptionEn,
+      longDescriptionAr,
       price,
       image,
       isNew,
@@ -90,6 +92,8 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
         nameAr,
         descriptionEn,
         descriptionAr,
+        longDescriptionEn: longDescriptionEn || null,
+        longDescriptionAr: longDescriptionAr || null,
         price: parseFloat(price),
         stock: 0, // Stock is managed via procurement, not product creation
         image: imageUrl,
@@ -138,6 +142,14 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
     if (data.isSale !== undefined) data.isSale = data.isSale === 'true' || data.isSale === true
     if (data.loyaltyPointsEnabled !== undefined) {
       data.loyaltyPointsEnabled = data.loyaltyPointsEnabled === 'true' || data.loyaltyPointsEnabled === true
+    }
+
+    // Handle long description fields - convert empty strings to null
+    if (data.longDescriptionEn !== undefined) {
+      data.longDescriptionEn = data.longDescriptionEn || null
+    }
+    if (data.longDescriptionAr !== undefined) {
+      data.longDescriptionAr = data.longDescriptionAr || null
     }
 
     const product = await prisma.product.update({
