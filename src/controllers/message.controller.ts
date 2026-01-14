@@ -10,7 +10,11 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
 
     let where: any = {}
 
-    if (type === 'sent') {
+    // Admin sees ALL messages to manage conversations
+    if (isAdmin && !type) {
+      // Return all messages for admin (both sent and received)
+      where = {}
+    } else if (type === 'sent') {
       where.senderId = userId
     } else {
       // Inbox - received messages + broadcasts
@@ -27,7 +31,8 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
           select: {
             id: true,
             name: true,
-            phone: true
+            phone: true,
+            role: true
           }
         },
         receiver: {
