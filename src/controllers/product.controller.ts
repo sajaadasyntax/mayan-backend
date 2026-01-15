@@ -5,9 +5,15 @@ import { getImageUrl } from '../middleware/upload.middleware'
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const { categoryId, search } = req.query
+    const { categoryId, search, includeArchived } = req.query
 
     const where: any = {}
+    
+    // By default, exclude archived products (for customer-facing pages)
+    // Admin can pass includeArchived=true to see all
+    if (includeArchived !== 'true') {
+      where.isArchived = false
+    }
     
     if (categoryId) {
       where.categoryId = categoryId as string
@@ -142,6 +148,9 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
     if (data.isSale !== undefined) data.isSale = data.isSale === 'true' || data.isSale === true
     if (data.loyaltyPointsEnabled !== undefined) {
       data.loyaltyPointsEnabled = data.loyaltyPointsEnabled === 'true' || data.loyaltyPointsEnabled === true
+    }
+    if (data.isArchived !== undefined) {
+      data.isArchived = data.isArchived === 'true' || data.isArchived === true
     }
 
     // Handle long description fields - convert empty strings to null

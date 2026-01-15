@@ -82,6 +82,7 @@ model Product {
   discount              Float?
   loyaltyPointsEnabled  Boolean   @default(false)
   loyaltyPointsValue    Int       @default(0)
+  isArchived            Boolean   @default(false)
   categoryId            String
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
