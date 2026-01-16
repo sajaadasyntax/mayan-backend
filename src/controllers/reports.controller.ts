@@ -5,9 +5,19 @@ import { AuthRequest } from '../middleware/auth.middleware'
 // Get top 10 selling products for this month
 export const getTopProductsSales = async (req: AuthRequest, res: Response) => {
   try {
-    const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+    const { from, to } = req.query
+    
+    let startOfMonth: Date
+    let endOfMonth: Date
+    
+    if (from && to) {
+      startOfMonth = new Date(from as string)
+      endOfMonth = new Date(to as string)
+    } else {
+      const now = new Date()
+      startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+    }
 
     const topProducts = await prisma.orderItem.groupBy({
       by: ['productId'],
@@ -65,9 +75,19 @@ export const getTopProductsSales = async (req: AuthRequest, res: Response) => {
 // Get top 10 customers by purchase amount this month
 export const getTopCustomersSales = async (req: AuthRequest, res: Response) => {
   try {
-    const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+    const { from, to } = req.query
+    
+    let startOfMonth: Date
+    let endOfMonth: Date
+    
+    if (from && to) {
+      startOfMonth = new Date(from as string)
+      endOfMonth = new Date(to as string)
+    } else {
+      const now = new Date()
+      startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+    }
 
     const topCustomers = await prisma.order.groupBy({
       by: ['userId'],
@@ -126,9 +146,22 @@ export const getTopCustomersSales = async (req: AuthRequest, res: Response) => {
 // Get profit and loss report for this month
 export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
   try {
-    const now = new Date()
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+    const { from, to } = req.query
+    
+    let startOfMonth: Date
+    let endOfMonth: Date
+    let targetMonth: Date
+    
+    if (from && to) {
+      startOfMonth = new Date(from as string)
+      endOfMonth = new Date(to as string)
+      targetMonth = startOfMonth
+    } else {
+      const now = new Date()
+      startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+      targetMonth = now
+    }
 
     // Get daily sales data
     const orders = await prisma.order.findMany({
@@ -159,7 +192,7 @@ export const getProfitLossReport = async (req: AuthRequest, res: Response) => {
     const dailyData: { [key: string]: { revenue: number; cost: number; profit: number } } = {}
 
     // Initialize all days of the month
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+    const daysInMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate()
     for (let i = 1; i <= daysInMonth; i++) {
       const day = i.toString().padStart(2, '0')
       dailyData[day] = { revenue: 0, cost: 0, profit: 0 }

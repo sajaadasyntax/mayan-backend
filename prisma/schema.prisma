@@ -38,6 +38,7 @@ model User {
   country       String?
   state         String?
   address       String?
+  isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -46,6 +47,7 @@ model User {
   sentMessages        Message[]  @relation("SentMessages")
   receivedMessages    Message[] @relation("ReceivedMessages")
   loyaltyRedemptions  LoyaltyRedemption[]
+  procurementsCreated Procurement[] @relation("ProcurementsCreated")
 
   @@map("users")
 }
@@ -218,13 +220,16 @@ model Message {
 model Procurement {
   id          String   @id @default(cuid())
   orderNumber String   @unique
+  poNumber    Int      @unique @default(autoincrement())
   supplier    String?
   status      String   @default("pending")
   totalCost   Float
   notes       String?
+  createdById String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  createdBy   User?    @relation("ProcurementsCreated", fields: [createdById], references: [id])
   items       ProcurementItem[]
 
   @@map("procurements")
@@ -321,5 +326,22 @@ model LoyaltyRedemption {
   loyaltyProduct    LoyaltyProduct @relation(fields: [loyaltyProductId], references: [id])
 
   @@map("loyalty_redemptions")
+}
+
+// Site Settings - stores site-wide configuration
+model SiteSettings {
+  id                String   @id @default(cuid())
+  bannerImage       String?
+  supportPhone      String?
+  supportEmail      String?
+  supportWhatsapp   String?
+  supportAddressEn  String?
+  supportAddressAr  String?
+  workingHoursEn    String?
+  workingHoursAr    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("site_settings")
 }
 

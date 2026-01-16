@@ -21,6 +21,7 @@ import deliveryRoutes from './routes/delivery.routes'
 import reportsRoutes from './routes/reports.routes'
 import recipeRoutes from './routes/recipe.routes'
 import loyaltyShopRoutes from './routes/loyaltyShop.routes'
+import settingsRoutes from './routes/settings.routes'
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -73,6 +74,7 @@ app.use('/api/delivery-zones', deliveryRoutes)
 app.use('/api/reports', reportsRoutes)
 app.use('/api/recipes', recipeRoutes)
 app.use('/api/loyalty-shop', loyaltyShopRoutes)
+app.use('/api/settings', settingsRoutes)
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

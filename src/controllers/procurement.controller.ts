@@ -11,6 +11,9 @@ export const getAllProcurements = async (req: AuthRequest, res: Response) => {
           include: {
             product: true
           }
+        },
+        createdBy: {
+          select: { name: true, phone: true }
         }
       },
       orderBy: {
@@ -36,6 +39,9 @@ export const getProcurementById = async (req: AuthRequest, res: Response) => {
           include: {
             product: true
           }
+        },
+        createdBy: {
+          select: { name: true, phone: true }
         }
       }
     })
@@ -54,6 +60,7 @@ export const getProcurementById = async (req: AuthRequest, res: Response) => {
 export const createProcurement = async (req: AuthRequest, res: Response) => {
   try {
     const { items, supplier, notes, totalCost } = req.body
+    const userId = req.user?.id
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: 'No items in procurement order' })
@@ -65,6 +72,7 @@ export const createProcurement = async (req: AuthRequest, res: Response) => {
         supplier,
         notes,
         totalCost: parseFloat(totalCost),
+        createdById: userId,
         items: {
           create: items.map((item: any) => ({
             productId: item.productId,
@@ -78,6 +86,9 @@ export const createProcurement = async (req: AuthRequest, res: Response) => {
           include: {
             product: true
           }
+        },
+        createdBy: {
+          select: { name: true, phone: true }
         }
       }
     })
