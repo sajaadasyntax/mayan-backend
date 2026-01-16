@@ -24,21 +24,18 @@ CREATE TABLE IF NOT EXISTS "site_settings" (
     CONSTRAINT "site_settings_pkey" PRIMARY KEY ("id")
 );
 
+-- Create sequence for poNumber first (outside DO block to ensure it exists)
+CREATE SEQUENCE IF NOT EXISTS "procurements_ponumber_seq";
+
 -- AlterTable: Add poNumber to procurements table (if not exists)
 DO $$ 
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                    WHERE table_name = 'procurements' AND column_name = 'poNumber') THEN
-        -- Create sequence for poNumber (PostgreSQL uses lowercase for unquoted identifiers)
-        -- The sequence name must match what Prisma expects: procurements_ponumber_seq
-        IF NOT EXISTS (SELECT 1 FROM pg_sequences WHERE sequencename = 'procurements_ponumber_seq') THEN
-            CREATE SEQUENCE "procurements_ponumber_seq";
-        END IF;
-        
         -- Add column
         ALTER TABLE "procurements" ADD COLUMN "poNumber" INTEGER;
         
-        -- Set the sequence as the default (using regclass to handle case sensitivity)
+        -- Set the sequence as the default
         ALTER TABLE "procurements" ALTER COLUMN "poNumber" SET DEFAULT nextval('procurements_ponumber_seq'::regclass);
         
         -- Update existing rows to have sequential numbers
