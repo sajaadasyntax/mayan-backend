@@ -29,15 +29,26 @@ DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                    WHERE table_name = 'procurements' AND column_name = 'poNumber') THEN
-        -- Create sequence for poNumber if it doesn't exist
-        CREATE SEQUENCE IF NOT EXISTS "procurements_poNumber_seq";
+        -- Create sequence for poNumber (PostgreSQL uses lowercase for unquoted identifiers)
+        -- The sequence name must match what Prisma expects: procurements_ponumber_seq
+        IF NOT EXISTS (SELECT 1 FROM pg_sequences WHERE sequencename = 'procurements_ponumber_seq') THEN
+            CREATE SEQUENCE "procurements_ponumber_seq";
+        END IF;
+        
+        -- Add column
         ALTER TABLE "procurements" ADD COLUMN "poNumber" INTEGER;
-        -- Set default value using sequence
-        ALTER TABLE "procurements" ALTER COLUMN "poNumber" SET DEFAULT nextval('procurements_poNumber_seq');
+        
+        -- Set the sequence as the default (using regclass to handle case sensitivity)
+        ALTER TABLE "procurements" ALTER COLUMN "poNumber" SET DEFAULT nextval('procurements_ponumber_seq'::regclass);
+        
         -- Update existing rows to have sequential numbers
-        UPDATE "procurements" SET "poNumber" = nextval('procurements_poNumber_seq') WHERE "poNumber" IS NULL;
+        UPDATE "procurements" SET "poNumber" = nextval('procurements_ponumber_seq'::regclass) WHERE "poNumber" IS NULL;
+        
         -- Make it NOT NULL after populating
         ALTER TABLE "procurements" ALTER COLUMN "poNumber" SET NOT NULL;
+        
+        -- Set the sequence owner (this links the sequence to the column)
+        ALTER SEQUENCE "procurements_ponumber_seq" OWNED BY "procurements"."poNumber";
     END IF;
 END $$;
 
