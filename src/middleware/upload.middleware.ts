@@ -66,6 +66,32 @@ export const uploadBankAccountImage = multer({
   }
 }).single('image')
 
+// Generic upload storage (for settings, etc.)
+const genericDir = 'uploads'
+if (!fs.existsSync(genericDir)) {
+  fs.mkdirSync(genericDir, { recursive: true })
+}
+
+const genericStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, genericDir)
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    const ext = path.extname(file.originalname)
+    cb(null, `upload-${uniqueSuffix}${ext}`)
+  }
+})
+
+// Generic upload middleware
+export const upload = multer({
+  storage: genericStorage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit for banners
+  }
+})
+
 // Helper to get public URL for uploaded file
 export const getImageUrl = (filename: string): string => {
   return `/uploads/products/${filename}`
