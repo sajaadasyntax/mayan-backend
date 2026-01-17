@@ -4,8 +4,10 @@ import { AuthRequest } from '../middleware/auth.middleware'
 
 export const getAllDeliveryZones = async (req: Request, res: Response) => {
   try {
+    const { all } = req.query
+    
     const zones = await prisma.deliveryZone.findMany({
-      where: { isActive: true },
+      where: all === 'true' ? {} : { isActive: true },
       orderBy: [
         { country: 'asc' },
         { state: 'asc' }
@@ -69,12 +71,14 @@ export const createDeliveryZone = async (req: AuthRequest, res: Response) => {
 export const updateDeliveryZone = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params
-    const { price, isActive } = req.body
+    const { country, state, price, isActive } = req.body
 
     const zone = await prisma.deliveryZone.update({
       where: { id },
       data: {
-        price: price ? parseFloat(price) : undefined,
+        country,
+        state,
+        price: price !== undefined ? parseFloat(price) : undefined,
         isActive
       }
     })
@@ -82,6 +86,21 @@ export const updateDeliveryZone = async (req: AuthRequest, res: Response) => {
     res.json(zone)
   } catch (error) {
     console.error('Update delivery zone error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
+export const deleteDeliveryZone = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params
+
+    await prisma.deliveryZone.delete({
+      where: { id }
+    })
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error('Delete delivery zone error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }
