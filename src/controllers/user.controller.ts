@@ -16,6 +16,7 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
         country: true,
         state: true,
         address: true,
+        isActive: true,
         createdAt: true,
         _count: {
           select: { orders: true }
@@ -58,7 +59,8 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         loyaltyPoints: parseInt(loyaltyPoints) || 0,
         country,
         state,
-        address
+        address,
+        isActive: true // New users are active by default
       },
       select: {
         id: true,
@@ -70,6 +72,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         country: true,
         state: true,
         address: true,
+        isActive: true,
         createdAt: true
       }
     })
@@ -84,7 +87,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 export const updateUser = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params
-    const { name, email, role, loyaltyPoints, country, state, address, password } = req.body
+    const { name, email, role, loyaltyPoints, country, state, address, password, isActive } = req.body
 
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
@@ -94,6 +97,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
     if (country !== undefined) updateData.country = country
     if (state !== undefined) updateData.state = state
     if (address !== undefined) updateData.address = address
+    if (isActive !== undefined) updateData.isActive = isActive
     if (password) {
       updateData.password = await bcrypt.hash(password, 10)
     }
@@ -111,6 +115,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
         country: true,
         state: true,
         address: true,
+        isActive: true,
         createdAt: true,
         _count: {
           select: { orders: true }
@@ -161,6 +166,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         country: true,
         state: true,
         address: true,
+        isActive: true,
         createdAt: true,
         _count: {
           select: { orders: true }

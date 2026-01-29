@@ -31,11 +31,15 @@ export const authenticate = async (
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, phone: true, role: true }
+      select: { id: true, phone: true, role: true, isActive: true }
     })
 
     if (!user) {
       return res.status(401).json({ error: 'User not found' })
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ error: 'Account is inactive. Please contact support.' })
     }
 
     req.user = {
@@ -80,10 +84,10 @@ export const optionalAuth = async (
 
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
-        select: { id: true, phone: true, role: true }
+        select: { id: true, phone: true, role: true, isActive: true }
       })
 
-      if (user) {
+      if (user && user.isActive) {
         req.user = {
           id: user.id,
           phone: user.phone,
