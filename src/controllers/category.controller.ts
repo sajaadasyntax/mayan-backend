@@ -16,7 +16,7 @@ export const getAllCategories = async (req: Request, res: Response) => {
           }
         },
         orderBy: {
-          nameEn: 'asc'
+          sortOrder: 'asc'
         }
       })
       return res.json(categories)
@@ -35,11 +35,17 @@ export const getAllCategories = async (req: Request, res: Response) => {
                 _count: {
                   select: { products: true }
                 }
+              },
+              orderBy: {
+                sortOrder: 'asc'
               }
             },
             _count: {
               select: { products: true, children: true }
             }
+          },
+          orderBy: {
+            sortOrder: 'asc'
           }
         },
         _count: {
@@ -47,7 +53,7 @@ export const getAllCategories = async (req: Request, res: Response) => {
         }
       },
       orderBy: {
-        nameEn: 'asc'
+        sortOrder: 'asc'
       }
     })
 
@@ -150,6 +156,31 @@ export const deleteCategory = async (req: AuthRequest, res: Response) => {
     res.json({ success: true })
   } catch (error) {
     console.error('Delete category error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
+export const updateCategoryOrder = async (req: AuthRequest, res: Response) => {
+  try {
+    const { categories } = req.body // Array of { id, sortOrder }
+
+    if (!Array.isArray(categories)) {
+      return res.status(400).json({ error: 'Invalid data format' })
+    }
+
+    // Update all categories in a transaction
+    await prisma.$transaction(
+      categories.map(cat => 
+        prisma.category.update({
+          where: { id: cat.id },
+          data: { sortOrder: cat.sortOrder }
+        })
+      )
+    )
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error('Update category order error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }
