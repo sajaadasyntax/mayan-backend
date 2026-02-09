@@ -82,6 +82,7 @@ model Product {
   image                 String?
   isNew                 Boolean   @default(false)
   isSale                Boolean   @default(false)
+  isComingSoon          Boolean   @default(false)
   discount              Float?
   loyaltyPointsEnabled  Boolean   @default(false)
   loyaltyPointsValue    Int       @default(0)

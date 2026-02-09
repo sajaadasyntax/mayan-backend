@@ -97,10 +97,24 @@ export const updateCoupon = async (req: AuthRequest, res: Response) => {
     const { id } = req.params
     const data = req.body
 
-    if (data.discountValue) data.discountValue = parseFloat(data.discountValue)
-    if (data.minPurchase) data.minPurchase = parseFloat(data.minPurchase)
-    if (data.maxUses) data.maxUses = parseInt(data.maxUses)
-    if (data.expiresAt) data.expiresAt = new Date(data.expiresAt)
+    // Handle numeric conversions - convert empty strings to null
+    if (data.discountValue !== undefined) {
+      data.discountValue = data.discountValue ? parseFloat(data.discountValue) : null
+    }
+    if (data.minPurchase !== undefined) {
+      data.minPurchase = data.minPurchase ? parseFloat(data.minPurchase) : null
+    }
+    if (data.maxUses !== undefined) {
+      data.maxUses = data.maxUses ? parseInt(data.maxUses) : null
+    }
+    if (data.expiresAt !== undefined) {
+      data.expiresAt = data.expiresAt ? new Date(data.expiresAt) : null
+    }
+
+    // Handle boolean conversions
+    if (data.isActive !== undefined) {
+      data.isActive = data.isActive === 'true' || data.isActive === true
+    }
 
     const coupon = await prisma.coupon.update({
       where: { id },

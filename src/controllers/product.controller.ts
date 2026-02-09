@@ -78,6 +78,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       image,
       isNew,
       isSale,
+      isComingSoon,
       discount,
       loyaltyPointsEnabled,
       loyaltyPointsValue,
@@ -105,6 +106,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
         image: imageUrl,
         isNew: isNew === 'true' || isNew === true,
         isSale: isSale === 'true' || isSale === true,
+        isComingSoon: isComingSoon === 'true' || isComingSoon === true,
         discount: discount ? parseFloat(discount) : null,
         loyaltyPointsEnabled: loyaltyPointsEnabled === 'true' || loyaltyPointsEnabled === true,
         loyaltyPointsValue: loyaltyPointsValue ? parseInt(loyaltyPointsValue) : 0,
@@ -146,6 +148,7 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
     // Convert boolean fields from string
     if (data.isNew !== undefined) data.isNew = data.isNew === 'true' || data.isNew === true
     if (data.isSale !== undefined) data.isSale = data.isSale === 'true' || data.isSale === true
+    if (data.isComingSoon !== undefined) data.isComingSoon = data.isComingSoon === 'true' || data.isComingSoon === true
     if (data.loyaltyPointsEnabled !== undefined) {
       data.loyaltyPointsEnabled = data.loyaltyPointsEnabled === 'true' || data.loyaltyPointsEnabled === true
     }
