@@ -218,7 +218,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 export const updateOrder = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params
-    const { status, paymentStatus, paymentProof } = req.body
+    const { status, paymentStatus } = req.body
 
     const order = await prisma.order.findUnique({
       where: { id },
@@ -242,7 +242,11 @@ export const updateOrder = async (req: AuthRequest, res: Response) => {
     const updateData: any = {}
     if (status) updateData.status = status
     if (paymentStatus) updateData.paymentStatus = paymentStatus
-    if (paymentProof) updateData.paymentProof = paymentProof
+    
+    // Handle file upload for payment proof
+    if (req.file) {
+      updateData.paymentProof = `/uploads/payment-proofs/${req.file.filename}`
+    }
 
     // Award loyalty points when payment is verified
     if (paymentStatus === 'VERIFIED' && order.paymentStatus !== 'VERIFIED' && order.loyaltyPointsEarned > 0) {

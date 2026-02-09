@@ -5,12 +5,16 @@ import fs from 'fs'
 // Ensure uploads directories exist
 const uploadsDir = 'uploads/products'
 const bankAccountsDir = 'uploads/bank-accounts'
+const paymentProofsDir = 'uploads/payment-proofs'
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
 }
 if (!fs.existsSync(bankAccountsDir)) {
   fs.mkdirSync(bankAccountsDir, { recursive: true })
+}
+if (!fs.existsSync(paymentProofsDir)) {
+  fs.mkdirSync(paymentProofsDir, { recursive: true })
 }
 
 // Configure storage for products
@@ -34,6 +38,18 @@ const bankAccountStorage = multer.diskStorage({
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
     const ext = path.extname(file.originalname)
     cb(null, `bank-${uniqueSuffix}${ext}`)
+  }
+})
+
+// Configure storage for payment proofs
+const paymentProofStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, paymentProofsDir)
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    const ext = path.extname(file.originalname)
+    cb(null, `payment-${uniqueSuffix}${ext}`)
   }
 })
 
@@ -65,6 +81,15 @@ export const uploadBankAccountImage = multer({
     fileSize: 5 * 1024 * 1024 // 5MB limit
   }
 }).single('image')
+
+// Configure multer for payment proofs
+export const uploadPaymentProof = multer({
+  storage: paymentProofStorage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
+}).single('paymentProof')
 
 // Generic upload storage (for settings, etc.)
 const genericDir = 'uploads'
